@@ -30,7 +30,7 @@ func main() {
                 // runTest()
                 newTime := time.Now().Unix()
                 diffTime := newTime - timestamp
-                if diffTime > 1 {
+                if diffTime > 4 {
                     go runTest()
                 }
                 timestamp = newTime
@@ -52,7 +52,7 @@ func main() {
 }
 
 func runTest() {
-    time.Sleep(1 * time.Second)
+    time.Sleep(100 * time.Millisecond)
     fmt.Println()
     fmt.Println()
     fmt.Println()
