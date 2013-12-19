@@ -25,6 +25,12 @@ bugging go test
 
 This command will try running `go test` on every file change.
 
+You may need to append this line to `~/.bashrc` to enable autocompletion.
+
+```
+complete -o filenames -F _root_command bugging
+```
+
 ### Bugs
 
 * files in deeper level are not watched
