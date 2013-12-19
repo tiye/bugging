@@ -11,7 +11,11 @@ import (
 )
 
 func main() {
-    runTest()
+    if len(os.Args) < 2 {
+        log.Println("need more args")
+        os.Exit(1)
+    }
+    go runCommand()
     watcher, err := fsnotify.NewWatcher()
     if err != nil {
         log.Fatal(err)
@@ -27,14 +31,13 @@ func main() {
             case ev := <- watcher.Event:
                 log.Println("event:", ev)
 
-                // runTest()
                 newTime := time.Now().Unix()
                 diffTime := newTime - timestamp
                 if diffTime > 4 {
-                    go runTest()
+                    go runCommand()
                 }
                 timestamp = newTime
-            case err := <-watcher.Error:
+            case err := <- watcher.Error:
                 log.Println("error:", err)
             }
         }
@@ -45,22 +48,21 @@ func main() {
         log.Fatal(err)
     }
 
-    <-done
+    <- done
 
     /* ... do stuff ... */
     watcher.Close()
 }
 
-func runTest() {
+func runCommand() {
     time.Sleep(100 * time.Millisecond)
     fmt.Println()
     fmt.Println()
+    fmt.Println("\x1b[33;1m~@~@~@~@~@~@~ Hello, World! ~@~@~@~@~@~@~\x1b[0m")
     fmt.Println()
-    fmt.Println("====== bugging ======")
-    fmt.Println()
-    fmt.Println()
-    fmt.Println()
-    cmd := exec.Command("go", "test")
+
+    cmd := exec.Command(os.Args[1], os.Args[2:]...)
+    log.Println("\x1b[35;1m", os.Args[0], os.Args[1], "\x1b[0m")
     stdout, err := cmd.StdoutPipe()
     if err != nil {
         fmt.Println(err)
