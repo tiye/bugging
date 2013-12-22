@@ -8,6 +8,7 @@ import (
     "log"
     "github.com/howeyc/fsnotify"
     "time"
+    "path/filepath"
 )
 
 func main() {
@@ -29,14 +30,18 @@ func main() {
         for {
             select {
             case ev := <- watcher.Event:
-                log.Println("event:", ev)
+                if ev.IsModify() {
+                    if filepath.Ext(ev.Name) == ".go" {
+                        log.Println("event:", ev, ev.Name)
 
-                newTime := time.Now().Unix()
-                diffTime := newTime - timestamp
-                if diffTime > 4 {
-                    go runCommand()
+                        newTime := time.Now().Unix()
+                        diffTime := newTime - timestamp
+                        if diffTime > 3 {
+                            go runCommand()
+                        }
+                        timestamp = newTime
+                    }
                 }
-                timestamp = newTime
             case err := <- watcher.Error:
                 log.Println("error:", err)
             }
