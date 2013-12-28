@@ -5,21 +5,21 @@ import (
     "os"
     "fmt"
     "io"
-    "log"
     "github.com/howeyc/fsnotify"
     "time"
+    "strings"
     "path/filepath"
 )
 
 func main() {
     if len(os.Args) < 2 {
-        log.Println("need more args")
+        fmt.Println("need more args")
         os.Exit(1)
     }
     go runCommand()
     watcher, err := fsnotify.NewWatcher()
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 
     done := make(chan bool)
@@ -31,26 +31,27 @@ func main() {
             select {
             case ev := <- watcher.Event:
                 if ev.IsModify() {
-                    if filepath.Ext(ev.Name) == ".go" {
-                        log.Println("event:", ev, ev.Name)
+                    extname := filepath.Ext(ev.Name)
+                    if extname != ".tmp" {
+                        fmt.Println("event:", ev, ev.Name)
 
                         newTime := time.Now().Unix()
                         diffTime := newTime - timestamp
-                        if diffTime > 3 {
+                        if diffTime > 2 {
                             go runCommand()
+                            timestamp = newTime
                         }
-                        timestamp = newTime
                     }
                 }
             case err := <- watcher.Error:
-                log.Println("error:", err)
+                fmt.Println("error:", err)
             }
         }
     }()
 
     err = watcher.Watch("./")
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 
     <- done
@@ -62,12 +63,12 @@ func main() {
 func runCommand() {
     time.Sleep(100 * time.Millisecond)
     fmt.Println()
-    fmt.Println()
-    fmt.Println("\x1b[33;1m~@~@~@~@~@~@~ Hello, World! ~@~@~@~@~@~@~\x1b[0m")
+    fmt.Print("\x1b[33;1m@@@@@@@@@@@@ ")
+    fmt.Print(strings.Join(os.Args[1:], " "))
+    fmt.Println("\x1b[0m")
     fmt.Println()
 
     cmd := exec.Command(os.Args[1], os.Args[2:]...)
-    log.Println("\x1b[35;1m", os.Args[0], os.Args[1], "\x1b[0m")
     stdout, err := cmd.StdoutPipe()
     if err != nil {
         fmt.Println(err)
